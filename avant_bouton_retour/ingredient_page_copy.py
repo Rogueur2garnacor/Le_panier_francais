@@ -15,7 +15,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QSize, Qt
 from core.ingredient import get_all_ingredients, add_ingredient, update_ingredient, delete_ingredient
-from gui.retour_page import go_to_main_page  # Importer la fonction de retour
 
 class IngredientPage(QMainWindow):
     def __init__(self):
@@ -75,13 +74,6 @@ class IngredientPage(QMainWindow):
         delete_button.clicked.connect(self.delete_ingredient)
         tile_layout.addWidget(delete_button, 0, 2)
 
-        # Tuile "Retour"
-        return_button = QPushButton("Retour")
-        return_button.setStyleSheet(tile_style)
-        return_button.setFixedSize(QSize(tile_width * 3 + 20, tile_height))  # Largeur ajustée pour occuper toute la ligne
-        return_button.clicked.connect(lambda: go_to_main_page(self))  # Appeler la fonction de retour avec la fenêtre actuelle
-        tile_layout.addWidget(return_button, 1, 0, 1, 3)  # Positionner sur toute la largeur
-
     def load_ingredients(self):
         """Charge les ingrédients depuis la base de données et les affiche dans la liste."""
         self.ingredient_list.clear()
@@ -131,16 +123,54 @@ class IngredientPage(QMainWindow):
             delete_ingredient(ingredient_id)
             self.load_ingredients()  # Recharger la liste après la suppression
 
-
 class AddIngredientDialog(QDialog):
     """Boîte de dialogue pour ajouter un ingrédient."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Ajouter un ingrédient")
-        
-class EditIngredientDialog(QDialog):
-   pass 
+        self.name = QLineEdit(self)
+        self.category = QLineEdit(self)
 
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Nom:"))
+        layout.addWidget(self.name)
+        layout.addWidget(QLabel("Catégorie:"))
+        layout.addWidget(self.category)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+                                   Qt.Orientation.Horizontal, self)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def get_inputs(self):
+        """Retourne les valeurs entrées par l'utilisateur."""
+        return self.name.text(), self.category.text()
+
+class EditIngredientDialog(QDialog):
+    """Boîte de dialogue pour modifier un ingrédient."""
+    def __init__(self, parent=None, ingredient_name: str = ""):
+        super().__init__(parent)
+        self.setWindowTitle("Modifier l'ingrédient")
+        self.name = QLineEdit(self)
+        self.name.setText(ingredient_name)  # Pré-remplir avec le nom existant
+        self.category = QLineEdit(self)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Nom:"))
+        layout.addWidget(self.name)
+        layout.addWidget(QLabel("Catégorie:"))
+        layout.addWidget(self.category)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+                                   Qt.Orientation.Horizontal, self)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def get_inputs(self):
+        """Retourne les valeurs entrées par l'utilisateur."""
+        return self.name.text(), self.category.text()
 
 def create_ingredient_page():
     """Crée et retourne une instance de IngredientPage."""

@@ -43,66 +43,71 @@ class MainPage(QMainWindow):
 
         # Ajouter des boutons (tuiles) pour chaque fonctionnalité
         inventory_button = QPushButton("Inventaire")
-        inventory_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")
         inventory_button.setFixedSize(QSize(tile_width, tile_height))
         inventory_button.clicked.connect(self.open_inventory_page)
         grid_layout.addWidget(inventory_button, 0, 0)
 
         recipe_button = QPushButton("Recettes")
-        recipe_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")
         recipe_button.setFixedSize(QSize(tile_width, tile_height))
         recipe_button.clicked.connect(self.open_recipe_page)
         grid_layout.addWidget(recipe_button, 0, 1)
 
         shopping_list_button = QPushButton("Listes de courses")
-        shopping_list_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold ")
         shopping_list_button.setFixedSize(QSize(tile_width, tile_height))
         shopping_list_button.clicked.connect(self.open_shopping_list_page)
         grid_layout.addWidget(shopping_list_button, 1, 0)
 
         ingredient_button = QPushButton("Ingrédients")
-        ingredient_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")
         ingredient_button.setFixedSize(QSize(tile_width, tile_height))
         ingredient_button.clicked.connect(self.open_ingredient_page)
         grid_layout.addWidget(ingredient_button, 1, 1)
 
-       
-        dashboard_button = QPushButton("Tableau de bord") 
-        dashboard_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")       
-        dashboard_button.setFixedSize(QSize(tile_width * 2 + 20 , tile_height))
+        dashboard_button = QPushButton("Tableau de bord")
+        dashboard_button.setFixedSize(QSize(tile_width * 2 + 20 , tile_height))  # Double la largeur et ajuste la position
         dashboard_button.clicked.connect(self.open_dashboard_page)
-        grid_layout.addWidget(dashboard_button, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter)
+        grid_layout.addWidget(dashboard_button, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter)  # S'étend sur deux colonnes et est centré
+
+        # Attributs pour conserver les fenêtres ouvertes
+        self.inventory_window = None
+        self.recipe_window = None
+        self.shopping_list_window = None
+        self.dashboard_window = None
+        self.ingredient_window = None
 
     def open_inventory_page(self):
-        """Ouvre la page Inventaire et ferme la page principale."""
-        self.inventory_window = create_inventory_page()
-        self.inventory_window.show()
-        self.close()
+        """Ouvre la page Inventaire."""
+        if not self.inventory_window:
+            self.inventory_window = create_inventory_page()
+            self.inventory_window.show()
+            self.inventory_window.destroyed.connect(lambda: setattr(self, 'inventory_window', None))
 
     def open_recipe_page(self):
-        """Ouvre la page Recettes et ferme la page principale."""
-        self.recipe_window = create_recipe_page()
-        self.recipe_window.show()
-        self.close()
+        """Ouvre la page Recettes."""
+        if not self.recipe_window:
+            self.recipe_window = create_recipe_page()
+            self.recipe_window.show()
+            self.recipe_window.destroyed.connect(lambda: setattr(self, 'recipe_window', None))
 
     def open_shopping_list_page(self):
-        """Ouvre la page Listes de courses et ferme la page principale."""
-        self.shopping_list_window = create_shopping_list_page()
-        self.shopping_list_window.show()
-        self.close()
+        """Ouvre la page Listes de courses."""
+        if not self.shopping_list_window:
+            self.shopping_list_window = create_shopping_list_page()
+            self.shopping_list_window.show()
+            self.shopping_list_window.destroyed.connect(lambda: setattr(self, 'shopping_list_window', None))
 
     def open_dashboard_page(self):
-        """Ouvre la page Tableau de bord et ferme la page principale."""
-        self.dashboard_window = create_dashboard_page()
-        self.dashboard_window.show()
-        self.close()
+        """Ouvre la page Tableau de bord."""
+        if not self.dashboard_window:
+            self.dashboard_window = create_dashboard_page()
+            self.dashboard_window.show()
+            self.dashboard_window.destroyed.connect(lambda: setattr(self, 'dashboard_window', None))
 
     def open_ingredient_page(self):
-        """Ouvre la page Ingrédients et ferme la page principale."""
-        self.ingredient_window = create_ingredient_page()
-        self.ingredient_window.show()
-        self.close()
-
+        """Ouvre la page Ingrédients."""
+        if not self.ingredient_window:
+            self.ingredient_window = create_ingredient_page()
+            self.ingredient_window.show()
+            self.ingredient_window.destroyed.connect(lambda: setattr(self, 'ingredient_window', None))
 
 def create_main_page():
     """Crée et retourne une instance de MainPage."""
