@@ -1,110 +1,116 @@
-# gui/main_page.py
-from PyQt6.QtWidgets import (
-    QMainWindow,
-    QWidget,
-    QGridLayout,
-    QPushButton,
-)
+from PyQt6.QtWidgets import QMainWindow, QWidget, QGridLayout, QPushButton, QLabel
 from PyQt6.QtGui import QPixmap, QPalette, QBrush
 from PyQt6.QtCore import QSize, Qt
-from gui.inventory_page import create_inventory_page
-from gui.recipe_page import create_recipe_page
-from gui.shopping_list_page import create_shopping_list_page
-from gui.dashboard_page import create_dashboard_page
-from gui.ingredient_page import create_ingredient_page
 
-class MainPage(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Le Panier Français - Page Principale")
-        self.setFixedSize(QSize(1200, 750))
+def create_base_page(title: str, width: int, height: int, background_image_path: str) -> QMainWindow:
+    """
+    Crée une page vierge avec les paramètres spécifiés.
+    
+    Args:
+        title (str): Le titre de la fenêtre.
+        width (int): La largeur de la fenêtre.
+        height (int): La hauteur de la fenêtre.
+        background_image_path (str): Chemin vers l'image de fond.
+    
+    Returns:
+        QMainWindow: Une instance de la fenêtre créée.
+    """
+    # Créer la fenêtre principale
+    page = QMainWindow()
+    page.setWindowTitle(title)
+    page.setFixedSize(QSize(width, height))
 
-        # Charger l'image de fond
-        background_image = QPixmap("gui/background.jpg")
-        background_image = background_image.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding)
+    # Charger l'image de fond
+    background_image = QPixmap(background_image_path)
+    background_image = background_image.scaled(page.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding)
 
-        # Créer une palette pour le fond
-        palette = QPalette()
-        palette.setBrush(QPalette.ColorRole.Window, QBrush(background_image))
-        self.setPalette(palette)
-        self.setAutoFillBackground(True)
+    # Créer une palette pour le fond
+    palette = QPalette()
+    palette.setBrush(QPalette.ColorRole.Window, QBrush(background_image))
+    page.setPalette(palette)
+    page.setAutoFillBackground(True)
 
-        # Créer un widget central
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+    # Créer un widget central
+    central_widget = QWidget()
+    page.setCentralWidget(central_widget)
 
-        # Créer un layout en grille pour les tuiles
-        grid_layout = QGridLayout(central_widget)
-        grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    # Créer un layout en grille
+    grid_layout = QGridLayout(central_widget)
+    grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Centrer le contenu
 
-        # Définir la taille des tuiles
-        tile_width = 300
-        tile_height = 150
+    return page
 
-        # Ajouter des boutons (tuiles) pour chaque fonctionnalité
-        inventory_button = QPushButton("Inventaire")
-        inventory_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")
-        inventory_button.setFixedSize(QSize(tile_width, tile_height))
-        inventory_button.clicked.connect(self.open_inventory_page)
-        grid_layout.addWidget(inventory_button, 0, 0)
+def create_tile(height: int, width: int, style: str, text: str) -> QPushButton:
+    """
+    Crée une tuile (QPushButton) avec les paramètres spécifiés.
 
-        recipe_button = QPushButton("Recettes")
-        recipe_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")
-        recipe_button.setFixedSize(QSize(tile_width, tile_height))
-        recipe_button.clicked.connect(self.open_recipe_page)
-        grid_layout.addWidget(recipe_button, 0, 1)
+    Args:
+        height (int): Hauteur de la tuile.
+        width (int): Largeur de la tuile.
+        style (str): Style CSS à appliquer à la tuile.
+        text (str): Texte affiché sur la tuile.
 
-        shopping_list_button = QPushButton("Listes de courses")
-        shopping_list_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold ")
-        shopping_list_button.setFixedSize(QSize(tile_width, tile_height))
-        shopping_list_button.clicked.connect(self.open_shopping_list_page)
-        grid_layout.addWidget(shopping_list_button, 1, 0)
+    Returns:
+        QPushButton: Une instance de la tuile créée.
+    """
+    tile = QPushButton(text)
+    tile.setFixedSize(QSize(width, height))
+    tile.setStyleSheet(style)
+    return tile
 
-        ingredient_button = QPushButton("Ingrédients")
-        ingredient_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")
-        ingredient_button.setFixedSize(QSize(tile_width, tile_height))
-        ingredient_button.clicked.connect(self.open_ingredient_page)
-        grid_layout.addWidget(ingredient_button, 1, 1)
+def create_main_page() -> QMainWindow:
+    """
+    Crée et retourne la page principale avec un titre et une tuile 'Commencer'.
+    
+    Returns:
+        QMainWindow: Une instance de la page principale.
+    """
+    # Créer la page principale
+    main_page = create_base_page("Le panier français", 1200, 750, "gui/background.jpg")
 
-       
-        dashboard_button = QPushButton("Tableau de bord") 
-        dashboard_button.setStyleSheet("font-size: 32px;font-family : Palatino;font-weight: bold")       
-        dashboard_button.setFixedSize(QSize(tile_width * 2 + 20 , tile_height))
-        dashboard_button.clicked.connect(self.open_dashboard_page)
-        grid_layout.addWidget(dashboard_button, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter)
+    # Récupérer le layout central (QGridLayout)
+    grid_layout = main_page.centralWidget().layout()
 
-    def open_inventory_page(self):
-        """Ouvre la page Inventaire et ferme la page principale."""
-        self.inventory_window = create_inventory_page()
-        self.inventory_window.show()
-        self.close()
+    # Ajouter un titre
+    title_label = QLabel("Bienvenue dans Le Panier Français !")
+    title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    title_label.setStyleSheet("""
+        font-size: 36px;
+        font-weight: bold;
+        color: white;
+        background-color: transparent;
+        font-family: 'Palatino Linotype', serif;
+        padding-bottom: 20px;
+    """)
+    
+    grid_layout.addWidget(title_label, 0, 0, 1, 2)  # Le titre occupe deux colonnes
 
-    def open_recipe_page(self):
-        """Ouvre la page Recettes et ferme la page principale."""
-        self.recipe_window = create_recipe_page()
-        self.recipe_window.show()
-        self.close()
+    # Style CSS pour les tuiles
+    tile_style = """
+        QPushButton {
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+            background: rgba(245, 245, 240, 0.85);
+            border: 2px solid rgba(245, 245, 240, 0.85);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: 'Palatino Linotype', serif;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+        QPushButton:hover {
+            background: rgba(245, 245, 240, 0.25);
+            border-color: rgba(245, 245, 240, 0.05);
+            transform: scale(1.08);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+        }
+    """
 
-    def open_shopping_list_page(self):
-        """Ouvre la page Listes de courses et ferme la page principale."""
-        self.shopping_list_window = create_shopping_list_page()
-        self.shopping_list_window.show()
-        self.close()
+    # Créer une tuile "Commencer"
+    start_tile = create_tile(100, 200, tile_style, "Commencer")
+    
+    # Ajouter la tuile au layout en grille à une position spécifique
+    grid_layout.addWidget(start_tile, 2,1 )  # Ligne : 1 | Colonne : 1
 
-    def open_dashboard_page(self):
-        """Ouvre la page Tableau de bord et ferme la page principale."""
-        self.dashboard_window = create_dashboard_page()
-        self.dashboard_window.show()
-        self.close()
-
-    def open_ingredient_page(self):
-        """Ouvre la page Ingrédients et ferme la page principale."""
-        self.ingredient_window = create_ingredient_page()
-        self.ingredient_window.show()
-        self.close()
-
-
-def create_main_page():
-    """Crée et retourne une instance de MainPage."""
-    main_page = MainPage()
     return main_page
