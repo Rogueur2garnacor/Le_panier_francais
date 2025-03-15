@@ -21,17 +21,24 @@ Déclaration des fonctions
 
 
 def main():
-    
-    create_tables(str(DB_PATH), TABLE_SCHEMAS)
-    print(f"Base de données créée avec succès à l'emplacement : {DB_PATH}")
+    try:
+        try:
+            create_tables(str(DB_PATH), TABLE_SCHEMAS)
+            print(f"Base de données créée avec succès à l'emplacement : {DB_PATH}")
+        except Exception as e:
+            print(f"L'erreur main 1.1 s'est produite : {e}")
+            
 
-
-    """Point d'entrée principal de l'application."""
-    app = QApplication(sys.argv)
-    main_window = create_main_page()
-    main_window.show()
-    sys.exit(app.exec())
-    
+        """Point d'entrée principal de l'application."""
+        try:
+            app = QApplication(sys.argv)
+            main_window = create_main_page()
+            main_window.show()
+            sys.exit(app.exec())
+        except Exception as e:
+            print(f"L'erreur main 1.2 s'est produite : {e}")   
+    except Exception as e:
+        print(f"L'erreur main 1.3 s'est produite : {e}") 
     
 
 """
