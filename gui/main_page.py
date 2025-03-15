@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QGridLayout, QPushButton, QLabel
+from PyQt6.QtWidgets import QMainWindow, QWidget, QGridLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtGui import QPixmap, QPalette, QBrush
 from PyQt6.QtCore import QSize, Qt
 
@@ -34,9 +34,9 @@ def create_base_page(title: str, width: int, height: int, background_image_path:
     central_widget = QWidget()
     page.setCentralWidget(central_widget)
 
-    # Créer un layout en grille
-    grid_layout = QGridLayout(central_widget)
-    grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Centrer le contenu
+    # Créer un layout en grille pour gérer les positions des widgets
+    layout = QGridLayout(central_widget)
+    layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Centrer le contenu globalement
 
     return page
 
@@ -58,6 +58,21 @@ def create_tile(height: int, width: int, style: str, text: str) -> QPushButton:
     tile.setStyleSheet(style)
     return tile
 
+def create_title(text: str, style: str,height: int,width: int ) -> QPushButton:
+    """
+    Crée un titre sous forme de tuile avec des paramètres prédéfinis.
+
+    Args:
+        text (str): Texte du titre.
+        style (str): Style CSS à appliquer au titre.
+        height (int): Hauteur du titre.
+        with (int): Largeur du titre.
+    Returns:
+        QPushButton: Une instance du titre créé sous forme de tuile.
+    """
+    return create_tile(height=height, width=width, style=style, text=text)
+
+
 def create_main_page() -> QMainWindow:
     """
     Crée et retourne la page principale avec un titre et une tuile 'Commencer'.
@@ -68,22 +83,33 @@ def create_main_page() -> QMainWindow:
     # Créer la page principale
     main_page = create_base_page("Le panier français", 1200, 750, "gui/background.jpg")
 
-    # Récupérer le layout central (QGridLayout)
-    grid_layout = main_page.centralWidget().layout()
-
-    # Ajouter un titre
-    title_label = QLabel("Bienvenue dans Le Panier Français !")
-    title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    title_label.setStyleSheet("""
-        font-size: 36px;
-        font-weight: bold;
-        color: white;
-        background-color: transparent;
-        font-family: 'Palatino Linotype', serif;
-        padding-bottom: 20px;
-    """)
+    # Layout central
+    layout = main_page.centralWidget().layout()
     
-    grid_layout.addWidget(title_label, 0, 0, 1, 2)  # Le titre occupe deux colonnes
+    # Style CSS pour le titre
+    title_style = """
+        QPushButton {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            background-color: transparent;
+            border: none;
+            font-family: 'Palatino Linotype', serif;
+            margin-top: -70px; /* Déplace le titre légèrement plus haut */
+        }
+        QPushButton:hover {
+            color: white; /* Aucun changement au survol */
+            background-color: transparent;
+        }
+    """
+    # Ajouter un titre centré en haut
+    title_label = create_title("Bienvenue dans Le Panier Français !", style=title_style, height=100, width=1200)
+    
+    layout.addWidget(title_label, 0, 0, 1, 3)  # Le titre occupe toute la largeur en haut
+
+    # Ajouter un espace flexible entre le titre et la tuile avec une hauteur réduite
+    spacer = QSpacerItem(200, 200, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+    layout.addItem(spacer, 1, 0)  # Ajouter un espace vide dans une ligne dédiée
 
     # Style CSS pour les tuiles
     tile_style = """
@@ -100,6 +126,7 @@ def create_main_page() -> QMainWindow:
             transition: all 0.3s ease-in-out;
         }
         QPushButton:hover {
+            color: white;
             background: rgba(245, 245, 240, 0.25);
             border-color: rgba(245, 245, 240, 0.05);
             transform: scale(1.08);
@@ -107,10 +134,9 @@ def create_main_page() -> QMainWindow:
         }
     """
 
-    # Créer une tuile "Commencer"
+    # Ajouter une tuile "Commencer" centrée au milieu
     start_tile = create_tile(100, 200, tile_style, "Commencer")
     
-    # Ajouter la tuile au layout en grille à une position spécifique
-    grid_layout.addWidget(start_tile, 2,1 )  # Ligne : 1 | Colonne : 1
+    layout.addWidget(start_tile, 2, 1)  # La tuile est centrée au milieu du tableau
 
     return main_page
