@@ -1,4 +1,8 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QGridLayout, QPushButton, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import (
+    QMainWindow, QWidget, QGridLayout, QPushButton, QSpacerItem, 
+    QSizePolicy, QApplication, QVBoxLayout, QTableWidget, 
+    QTableWidgetItem, QHBoxLayout,QLabel
+)
 from PyQt6.QtGui import QPixmap, QPalette, QBrush
 from PyQt6.QtCore import QSize, Qt
 
@@ -140,7 +144,6 @@ def create_start_page() -> QMainWindow:
         """
         # Ajouter un titre centré en haut
         title_label = create_title("Le Panier Français !", style=title_style, height=100, width=1200)
-        
         layout.addWidget(title_label, 0, 1, 1, 3)  # Le titre occupe toute la largeur en haut
 
         # Style CSS pour les tuiles
@@ -166,30 +169,102 @@ def create_start_page() -> QMainWindow:
             }
         """
 
-       
-
-
-        # Créer et ajouter les 5 tuiles
+        # Créer et ajouter les tuiles
         tiles = [
-            ("Inventaire", 1, 2),
-            ("Recettes", 2, 2),
-            ("Ingrédients", 3, 2),
-            ("Listes de courses", 4, 2),
-            ("Tableau de bord", 5, 2),            
+            ("Inventaire", "inventory_page", 1, 2),
+            ("Recettes", None, 2, 2),
+            ("Ingrédients", None, 3, 2),
+            ("Listes de courses", None, 4, 2),
+            ("Tableau de bord", None, 5, 2),
+            ("Quitter", "quit", 6, 2)
         ]
 
         for tile_info in tiles:
             tile = create_tile(50, 250, tile_style, tile_info[0])
-            if len(tile_info) > 4:
-                layout.addWidget(tile, tile_info[1], tile_info[2], tile_info[3], tile_info[4])
-            else:
-                layout.addWidget(tile, tile_info[1], tile_info[2])
+
+            # Ajouter une action spécifique pour chaque tuile
+            if tile_info[1] == "inventory_page":
+                inventory_page = create_inventory_page()
+                clic_tile(tile=tile, page_to_close=start_page, page_to_open=inventory_page)
+            elif tile_info[1] == "quit":
+                tile.clicked.connect(lambda: QApplication.quit())
+
+            layout.addWidget(tile, tile_info[2], tile_info[3])
 
         return start_page
     except Exception as e:
-        print(f"L'erreur main_page 1.6 s'est produite : {e}")
+        print(f"L'erreur main_page create_start_page s'est produite : {e}")
 
 
+def create_inventory_page() -> QMainWindow:
+    try:
+        # Créer la page principale
+        inventory_page = create_base_page("Inventaire", 1200, 750, "gui/background.jpg")
+
+        # Layout central
+        layout = inventory_page.centralWidget().layout()
+
+        # Ajouter un tableau pour afficher les données
+        table = QTableWidget()
+        table.setRowCount(10)  # Nombre de lignes initiales
+        table.setColumnCount(8)  # 6 colonnes pour les données + 2 colonnes pour les boutons
+        table.setHorizontalHeaderLabels([
+            "Modifier", "Nom", "Quantité", "Unité de mesure", 
+            "Seuil bas", "Seuil haut", "Date d'expiration", "Supprimer"
+        ])
+        
+        # Ajuster la taille des colonnes et des lignes
+        table.horizontalHeader().setDefaultSectionSize(145)  # Largeur par défaut des colonnes
+        table.verticalHeader().setDefaultSectionSize(50)     # Hauteur par défaut des lignes
+
+        # Remplir le tableau avec des boutons Modifier et Supprimer
+        for row in range(table.rowCount()):
+            # Bouton Modifier (stylo)
+            modify_button = QPushButton("✏️")
+            modify_button.setFixedSize(QSize(40, 40))
+            modify_button.clicked.connect(lambda _, r=row: print(f"Modifier la ligne {r}"))
+            modify_layout = QVBoxLayout()
+            modify_layout.addWidget(modify_button)
+            modify_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            modify_widget = QWidget()
+            modify_widget.setLayout(modify_layout)
+            table.setCellWidget(row, 0, modify_widget)
+
+            # Bouton Supprimer (croix rouge)
+            delete_button = QPushButton("❌")
+            delete_button.setFixedSize(QSize(40, 40))
+            delete_button.clicked.connect(lambda _, r=row: print(f"Supprimer la ligne {r}"))
+            delete_layout = QVBoxLayout()
+            delete_layout.addWidget(delete_button)
+            delete_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            delete_widget = QWidget()
+            delete_widget.setLayout(delete_layout)
+            table.setCellWidget(row, 7, delete_widget)
+
+            # Ajouter des données fictives dans les colonnes centrales
+            for col in range(1, 7):
+                item = QTableWidgetItem()
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                table.setItem(row, col, item)
+
+        # Ajouter le tableau au layout principal
+        layout.addWidget(table, 1, 1)
+
+        # Ajouter un bouton pour ajouter une nouvelle ligne en dessous du tableau
+        add_button = QPushButton("+")
+        add_button.setFixedSize(QSize(100, 50))
+        add_button.clicked.connect(lambda: print("Ajouter une nouvelle ligne"))
+        layout.addWidget(add_button, 2, 1)
+
+        return inventory_page
+
+    except Exception as e:
+        print(f"L'erreur create_inventory_page s'est produite : {e}")
+
+
+####################################################################################
 def create_main_page() -> QMainWindow:
     try:
         start_page = create_start_page()
